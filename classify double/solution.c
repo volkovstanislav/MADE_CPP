@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
-
-
+#include <stdlib.h>>
+#include <math.h>
 
 /**
  * Library-level functions.
@@ -15,7 +14,11 @@ uint64_t convertToUint64 (double number) {
 }
 
 bool getBit (const uint64_t number, const uint8_t index) {
-    /// Your code here...
+    uint64_t mask = 1;
+    mask <<= index;
+    uint64_t temp = mask & number;
+    temp >>= index;
+    return temp;
 }
 
 
@@ -24,43 +27,152 @@ bool getBit (const uint64_t number, const uint8_t index) {
  */
 
 bool checkForPlusZero (uint64_t number) {
-    /// Your code here.
+    for (uint8_t i = 0; i < 64; ++i) {
+        if (getBit(number, 63 - i) != 0)
+            return 0;
+    }
+    return 1;
 }
 
 bool checkForMinusZero (uint64_t number) {
-    return number == 0x8000000000000000;
+    if (getBit(number, 63) == 1) {
+        for (uint8_t i = 0; i < 63; ++i)
+            if (getBit(number, 62 - i) != 0)
+                return 0;
+        return 1;
+    } else
+        return 0;
 }
 
 bool checkForPlusInf (uint64_t number) {
-    /// Your code here.
+    if (getBit(number, 63) == 0) {
+        for (uint8_t i = 52; i < 63; i++)
+            if (getBit(number, i) != 1)
+                return 0;
+        for (uint8_t i = 0; i < 52; i++) {
+            if (getBit(number, i) != 0)
+                return 0;
+        }
+        return 1;
+    } else
+        return 0;
 }
 
 bool checkForMinusInf (uint64_t number) {
-    /// Your code here.
+    if (getBit(number, 63) == 1) {
+        for (uint8_t i = 52; i < 63; i++)
+            if (getBit(number, i) != 1)
+                return 0;
+        for (uint8_t i = 0; i < 52; i++) {
+            if (getBit(number, i) != 0)
+                return 0;
+        }
+        return 1;
+    } else
+        return 0;
 }
 
 bool checkForPlusNormal (uint64_t number) {
-    /// Your code here.
+    uint8_t unique_bit = 0;
+    if (getBit(number, 63) == 0) {
+        for (uint8_t i = 52; i < 63; i++) {
+            if (getBit(number, i) == 0)
+                unique_bit++;
+        }
+
+        if (unique_bit > 0 && unique_bit < 11)
+            return 1;
+        else
+            return 0;
+    } else
+        return 0;
 }
 
 bool checkForMinusNormal (uint64_t number) {
-    /// Your code here.
+    uint8_t unique_bit = 0;
+    if (getBit(number, 63) == 1) {
+        for (uint8_t i = 52; i < 63; i++) {
+            if (getBit(number, i) == 0)
+                unique_bit++;
+        }
+
+        if (unique_bit > 0 && unique_bit < 11)
+            return 1;
+        else
+            return 0;
+    } else
+        return 0;
 }
 
 bool checkForPlusDenormal (uint64_t number) {
-    /// Your code here.
+    if (getBit(number, 63) == 0) {
+        for (uint8_t i = 52; i < 63; i++) {
+            if (getBit(number, i) != 0)
+                return 0;
+        }
+        uint8_t unique_bit = 0;
+        for (uint8_t i = 0; i < 52; i++) {
+            if (getBit(number, i) == 0)
+                unique_bit++;
+        }
+
+        if (unique_bit > 0 && unique_bit < 11)
+            return 0;
+        else
+            return 1;
+
+    } else
+        return 0;
 }
 
 bool checkForMinusDenormal (uint64_t number) {
-    /// Your code here.
+    if (getBit(number, 63) == 1) {
+        for (uint8_t i = 52; i < 63; i++) {
+            if (getBit(number, i) != 0)
+                return 0;
+        }
+        uint8_t unique_bit = 0;
+        for (uint8_t i = 0; i < 52; i++) {
+            if (getBit(number, i) == 0)
+                unique_bit++;
+        }
+
+        if (unique_bit > 0 && unique_bit < 11)
+            return 0;
+        else
+            return 1;
+
+    } else
+        return 0;
 }
 
 bool checkForSignalingNan (uint64_t number) {
-    /// Your code here.
+    for (uint8_t i = 52; i < 63; i++) {
+        if (getBit(number, i) != 1)
+            return 0;
+    }
+    uint8_t unique_bit = 0;
+    for (uint8_t i = 0; i < 52; i++) {
+        if (getBit(number, i) == 0)
+            unique_bit++;
+    }
+
+    if (unique_bit > 0 && unique_bit < 11)
+        return 1;
+    else
+        return 0;
 }
 
 bool checkForQuietNan (uint64_t number) {
-    /// Your code here.
+    for (uint8_t i = 52; i < 63; i++) {
+        if (getBit(number, i) != 1)
+            return 0;
+    }
+
+    if (getBit(number, 51) == 1)
+        return 1;
+    else
+        return 0;
 }
 
 
